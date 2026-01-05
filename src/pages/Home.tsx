@@ -1,9 +1,9 @@
 import {useEffect, useMemo, useState} from 'react'
 import {Link} from 'react-router-dom'
 import styled from 'styled-components'
-import {client, urlFor} from '../sanityClient'
+import {client} from '../sanityClient'
 import type {Recipe} from '../types/recipe'
-import {formatTime, getDifficultyLabel} from '../utils/recipeFormatting'
+import {getDifficultyLabel} from '../utils/recipeFormatting'
 
 const recipeQuery = `*[_type == "recipe"] | order(title asc) {
   _id,
@@ -36,11 +36,8 @@ const accentColors: Record<(typeof cardAccents)[number], string> = {
   sky: '#5b7fa2',
 }
 
-const emptySteps = ['Add steps to teach the rest of us how to make this one!']
-
 const HomePage = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [tagFilter, setTagFilter] = useState('all')
   const [loading, setLoading] = useState(true)
@@ -51,7 +48,6 @@ const HomePage = () => {
       setLoading(true)
       try {
         const data = await client.fetch<Recipe[]>(recipeQuery)
-        console.log(data)
         setRecipes(data)
       } catch (err) {
         console.error(err)
@@ -91,8 +87,8 @@ const HomePage = () => {
           <Eyebrow>Drake Family Cookbook</Eyebrow>
           <h1>Comfort cooking, saved in one cozy kitchen.</h1>
           <Lede>
-            Browse every treasured recipe from the family box. Search, filter, and open the steps
-            without leaving this page.
+            Browse every treasured recipe from the family box. Search, filter, and open the full
+            recipe page to see every detail.
           </Lede>
           <HeroActions>
             <Button as="a" href="#recipes" $variant="primary">
@@ -114,7 +110,7 @@ const HomePage = () => {
               onChange={(event) => setSearchTerm(event.target.value)}
             />
             <Count>
-              {loading ? 'Loading…' : `${filteredRecipes.length} recipe${filteredRecipes.length === 1 ? '' : 's'}`}
+              {loading ? 'Loading…' : ``}
             </Count>
           </SearchRow>
         </div>
@@ -170,44 +166,12 @@ const HomePage = () => {
               key={recipe._id}
               recipe={recipe}
               accent={cardAccents[index % cardAccents.length]}
-              expanded={expandedId === recipe._id}
-              onToggle={() => setExpandedId(expandedId === recipe._id ? null : recipe._id)}
             />
           ))}
         </RecipeGrid>
       )}
 
-      {/* {spotlightRecipe && !loading && (
-        <Spotlight>
-          <div>
-            <Eyebrow>Spotlight</Eyebrow>
-            <h2>{spotlightRecipe.title}</h2>
-            <Lede>
-              {spotlightRecipe.shortDescription ||
-                'Open this recipe to see the ingredient list and numbered steps.'}
-            </Lede>
-            <MetaRow>
-              <span>{formatTime(spotlightRecipe.prepTime, spotlightRecipe.cookTime)} total</span>
-              {spotlightRecipe.servings ? <span>{spotlightRecipe.servings} servings</span> : null}
-              {spotlightRecipe.familyMember ? (
-                <span>Shared by {spotlightRecipe.familyMember}</span>
-              ) : null}
-            </MetaRow>
-            <Button
-              type="button"
-              $variant="ghost"
-              onClick={() =>
-                setExpandedId(expandedId === spotlightRecipe._id ? null : spotlightRecipe._id)
-              }
-            >
-              {expandedId === spotlightRecipe._id ? 'Hide steps' : 'Open steps'}
-            </Button>
-          </div>
-          <SpotlightImageWrapper>
-            <SpotlightImage recipe={spotlightRecipe} />
-          </SpotlightImageWrapper>
-        </Spotlight>
-      )} */}
+      {/* Spotlight section available if you want to feature a recipe later */}
     </Page>
   )
 }
@@ -215,90 +179,29 @@ const HomePage = () => {
 type CardProps = {
   recipe: Recipe
   accent: (typeof cardAccents)[number]
-  expanded: boolean
-  onToggle: () => void
 }
 
-const RecipeCard = ({recipe, accent, expanded, onToggle}: CardProps) => {
-  const image = urlFor(recipe.heroImage)?.width(800).height(560).url()
-  const ingredients = recipe.ingredients ?? []
-  const steps = recipe.instructions?.length ? recipe.instructions : emptySteps
-  const difficulty = getDifficultyLabel(recipe.difficulty)
+const RecipeCard = ({recipe, accent}: CardProps) => {
   const slug = recipe.slug?.current
-  const background = image
-    ? `linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.35)), url(${image})`
-    : undefined
+  const target = slug ? `/recipes/${slug}` : '/'
+  const difficulty = getDifficultyLabel(recipe.difficulty)
 
   return (
-    <RecipeCardContainer accent={accent} $expanded={expanded}>
-      <RecipeMedia accent={accent} $background={background}>
-        <MediaTop>
-          {difficulty ? <Pill $muted>{difficulty}</Pill> : null}
-          {recipe.tags && recipe.tags.length > 0 ? (
-            <TagsInline>
-              {recipe.tags.slice(0, 2).map((tag) => (
-                <Pill key={tag} $ghost>
-                  {tag}
-                </Pill>
-              ))}
-              {recipe.tags.length > 2 ? <Pill $ghost>+{recipe.tags.length - 2}</Pill> : null}
-            </TagsInline>
-          ) : null}
-        </MediaTop>
-        <MediaMeta>
-          <span>{formatTime(recipe.prepTime, recipe.cookTime)}</span>
-          {recipe.servings ? <span>{recipe.servings} servings</span> : null}
-        </MediaMeta>
-      </RecipeMedia>
+    <RecipeCardContainer accent={accent} to={target}>
+      <Eyebrow>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</Eyebrow>
+      <h3>{recipe.title}</h3>
+      <Muted>{recipe.shortDescription || 'No description yet.'}</Muted>
 
-      <RecipeCardBody>
-        <Eyebrow>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</Eyebrow>
-        <h3>{recipe.title}</h3>
-        <Muted>{recipe.shortDescription || 'No description yet.'}</Muted>
-        <CardActions>
-          <Button type="button" $variant="ghost" onClick={onToggle}>
-            {expanded ? 'Hide steps' : 'View steps'}
-          </Button>
-          {slug ? (
-            <Button as={Link} to={`/recipes/${slug}`} $variant="text">
-              View full recipe
-            </Button>
-          ) : null}
-        </CardActions>
-
-        {expanded && (
-          <CardDetails>
-            <div>
-              <SectionHeading>Ingredients</SectionHeading>
-              <List>
-                {ingredients.map((ingredient) => {
-                  const parts = [ingredient.quantity, ingredient.unit, ingredient.item].filter(Boolean)
-                  return (
-                    <li key={ingredient._key}>
-                      <span className="primary">{parts.join(' ')}</span>
-                      {ingredient.note ? <span className="note">{ingredient.note}</span> : null}
-                    </li>
-                  )
-                })}
-              </List>
-            </div>
-            <div>
-              <SectionHeading>Steps</SectionHeading>
-              <Steps>
-                {steps.map((step, index) => (
-                  <li key={`${recipe._id}-step-${index}`}>{step}</li>
-                ))}
-              </Steps>
-            </div>
-            {recipe.tips ? (
-              <Tips>
-                <SectionHeading>Family tips</SectionHeading>
-                <p>{recipe.tips}</p>
-              </Tips>
-            ) : null}
-          </CardDetails>
-        )}
-      </RecipeCardBody>
+      <div>
+        {difficulty ? <span>{difficulty}</span> : null}
+        {recipe.tags && recipe.tags.length > 0 ? (
+          <TagsInline>
+            {recipe.tags.map((tag) => (
+              <Pill key={tag}>{tag}</Pill>
+            ))}
+          </TagsInline>
+        ) : null}
+      </div>
     </RecipeCardContainer>
   )
 }
@@ -450,7 +353,7 @@ const Pill = styled.span<{$muted?: boolean; $ghost?: boolean}>`
 const Eyebrow = styled.p`
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  font-size: 12px;
+  font-size: 20px;
   color: #5a665d;
   margin-bottom: 6px;
   font-weight: 700;
@@ -519,124 +422,47 @@ const RecipeGrid = styled.section`
   gap: 18px;
 `
 
-const RecipeCardContainer = styled.article<{
+const RecipeCardContainer = styled(Link)<{
   accent: (typeof cardAccents)[number]
-  $expanded: boolean
 }>`
   background: ${({theme}) => theme.colors.surface};
   border-radius: ${({theme}) => theme.radii.lg};
-  overflow: hidden;
-  border: 1px solid ${({$expanded, theme}) => ($expanded ? theme.colors.sage : '#e7d9c5')};
+  border: 1px solid #e7d9c5;
   box-shadow: ${({theme}) => theme.shadows.card};
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  cursor: pointer;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: ${({theme}) => theme.radii.lg};
+    border-left: 6px solid ${({accent}) => accentColors[accent]};
+    pointer-events: none;
+  }
 
   &:hover {
-    transform: translateY(-4px);
+    transform: ${({$clickable}) => ($clickable ? 'translateY(-3px)' : 'none')};
     box-shadow: ${({theme}) => theme.shadows.cardHover};
+    border-color: ${({theme}) => theme.colors.sage};
   }
-`
-
-const RecipeMedia = styled.div<{accent: (typeof cardAccents)[number]; $background?: string}>`
-  min-height: 160px;
-  background: ${({$background, accent}) => $background || accentColors[accent]};
-  background-size: cover;
-  background-position: center;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  color: #ffffff;
-`
-
-const MediaTop = styled.div`
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
 `
 
 const TagsInline = styled.div`
   display: inline-flex;
   gap: 6px;
   flex-wrap: wrap;
-  justify-content: flex-end;
-`
-
-const MediaMeta = styled.div`
-  display: inline-flex;
-  gap: 10px;
-  font-weight: 600;
-  font-size: 14px;
-  background: rgba(0, 0, 0, 0.28);
-  padding: 8px 10px;
-  border-radius: ${({theme}) => theme.radii.sm};
-  width: fit-content;
-`
-
-const RecipeCardBody = styled.div`
-  padding: 18px 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 `
 
 const Muted = styled.p`
   color: ${({theme}) => theme.colors.muted};
   margin: 0;
-`
-
-const CardActions = styled.div`
-  margin-top: 6px;
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-`
-
-const CardDetails = styled.div`
-  border-top: 1px solid #e7d9c5;
-  padding-top: 12px;
-  display: grid;
-  gap: 12px;
-`
-
-const SectionHeading = styled.h4`
-  margin: 0 0 8px;
-`
-
-const List = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 10px;
-
-  li {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .primary {
-    font-weight: 600;
-  }
-  .note {
-    color: ${({theme}) => theme.colors.muted};
-    font-size: 14px;
-  }
-`
-
-const Steps = styled.ol`
-  padding-left: 20px;
-  margin: 0;
-  display: grid;
-  gap: 8px;
-`
-
-const Tips = styled.div`
-  border-radius: ${({theme}) => theme.radii.sm};
-  background: #fff8ed;
-  padding: 12px;
-  border: 1px solid #ecdcc6;
 `
 
 export default HomePage

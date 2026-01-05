@@ -3,7 +3,7 @@ import {ThemeProvider} from 'styled-components'
 import {GlobalStyle} from './styles/GlobalStyle'
 import {theme} from './theme'
 import HomePage from './pages/Home'
-import RecipeDetailPage from './pages/RecipeDetail'
+import RecipePage from './pages/RecipePage'
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/recipes/:slug" element={<RecipeDetailPage />} />
+          <Route path="/recipes/:slug" element={<RecipePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
