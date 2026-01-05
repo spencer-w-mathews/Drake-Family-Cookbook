@@ -423,7 +423,8 @@ const RecipeGrid = styled.section`
 `
 
 const RecipeCardContainer = styled(Link)<{
-  accent: (typeof cardAccents)[number]
+  accent: (typeof cardAccents)[number];
+  $clickable?: boolean;
 }>`
   background: ${({theme}) => theme.colors.surface};
   border-radius: ${({theme}) => theme.radii.lg};
