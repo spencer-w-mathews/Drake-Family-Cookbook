@@ -170,8 +170,6 @@ const HomePage = () => {
           ))}
         </RecipeGrid>
       )}
-
-      {/* Spotlight section available if you want to feature a recipe later */}
     </Page>
   )
 }
