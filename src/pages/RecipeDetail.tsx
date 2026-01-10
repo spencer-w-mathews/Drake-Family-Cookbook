@@ -210,7 +210,6 @@ const Header = styled.header`
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 18px;
-  background: ${({theme}) => theme.colors.surface};
   border: 1px solid #e7d9c5;
   border-radius: 18px;
   padding: 18px;

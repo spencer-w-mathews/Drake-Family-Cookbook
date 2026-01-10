@@ -3,7 +3,6 @@ import {Link} from 'react-router-dom'
 import styled from 'styled-components'
 import {client} from '../sanityClient'
 import type {Recipe} from '../types/recipe'
-import {getDifficultyLabel} from '../utils/recipeFormatting'
 
 const recipeQuery = `*[_type == "recipe"] | order(title asc) {
   _id,
@@ -85,7 +84,7 @@ const HomePage = () => {
       <Hero>
         <HeroContent>
           <Eyebrow>Drake Family Cookbook</Eyebrow>
-          <h1>Comfort cooking, saved in one cozy kitchen.</h1>
+          <h1>Always doy your best and leave the rest up to God!</h1>
           <Lede>
             Browse every treasured recipe from the family box. Search, filter, and open the full
             recipe page to see every detail.
@@ -182,16 +181,16 @@ type CardProps = {
 const RecipeCard = ({recipe, accent}: CardProps) => {
   const slug = recipe.slug?.current
   const target = slug ? `/recipes/${slug}` : '/'
-  const difficulty = getDifficultyLabel(recipe.difficulty)
+
 
   return (
     <RecipeCardContainer accent={accent} to={target}>
       <Eyebrow>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</Eyebrow>
-      <h3>{recipe.title}</h3>
+      <h2>{recipe.title}</h2>
       <Muted>{recipe.shortDescription || ''}</Muted>
 
       <div>
-        {difficulty ? <span>{difficulty}</span> : null}
+       
         {recipe.tags && recipe.tags.length > 0 ? (
           <TagsInline>
             {recipe.tags.map((tag) => (

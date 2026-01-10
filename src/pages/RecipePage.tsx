@@ -113,10 +113,12 @@ const RecipePage = () => {
               <Label>Time</Label>
               <strong>{formatTime(recipe.prepTime, recipe.cookTime)}</strong>
             </MetaItem>
-            <MetaItem>
-              <Label>Servings</Label>
-              <strong>{recipe.servings ?? '—'}</strong>
-            </MetaItem>
+            {recipe.servings &&
+              <MetaItem>
+                <Label>Servings</Label>
+                <strong>{recipe.servings ?? '—'}</strong>
+              </MetaItem>
+            }
             <MetaItem>
               <Label>Difficulty</Label>
               <strong>{difficulty ?? '—'}</strong>
@@ -257,7 +259,7 @@ const HeroPlaceholder = styled.div`
 const HeroOverlay = styled.div`
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(7, 58, 11, 0.15), rgba(14, 51, 19, 0.55));
+  background: ${({theme}) => theme.colors.sage};
 `
 
 const HeroContent = styled.div`
