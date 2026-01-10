@@ -188,7 +188,7 @@ const RecipeCard = ({recipe, accent}: CardProps) => {
     <RecipeCardContainer accent={accent} to={target}>
       <Eyebrow>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</Eyebrow>
       <h3>{recipe.title}</h3>
-      <Muted>{recipe.shortDescription || 'No description yet.'}</Muted>
+      <Muted>{recipe.shortDescription || ''}</Muted>
 
       <div>
         {difficulty ? <span>{difficulty}</span> : null}
@@ -351,7 +351,7 @@ const Pill = styled.span<{$muted?: boolean; $ghost?: boolean}>`
 const Eyebrow = styled.p`
   text-transform: uppercase;
   letter-spacing: 0.15em;
-  font-size: 20px;
+  font-size: 16px;
   color: #5a665d;
   margin-bottom: 6px;
   font-weight: 700;
