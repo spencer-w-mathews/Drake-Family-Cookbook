@@ -27,12 +27,23 @@ const recipeQuery = `*[_type == "recipe"] | order(title asc) {
   instructions
 }`
 
-const cardAccents = ['sage', 'rose', 'amber', 'sky'] as const
-const accentColors: Record<(typeof cardAccents)[number], string> = {
-  sage: '#6c8f73',
-  rose: '#a63d40',
-  amber: '#c59a4a',
-  sky: '#5b7fa2',
+const tagAccentColors: Record<string, string> = {
+  Appetizer: '#7fb3d5',
+  Beverage: '#a3d5c3',
+  Soup: '#f3b3b3',
+  Salad: '#b7e1a1',
+  Vegetable: '#ffd59e',
+  'Main Dish': '#c7b6e8',
+  Bread: '#f6c2a6',
+  Roll: '#f9d77e',
+  Dessert: '#f2a7c6',
+  Miscellaneous: '#b7c8d9',
+}
+const fallbackAccentColor = '#6c8f73'
+
+const getRecipeAccentColor = (recipe: Recipe) => {
+  const match = recipe.tags?.find((tag) => tagAccentColors[tag])
+  return match ? tagAccentColors[match] : fallbackAccentColor
 }
 
 const HomePage = () => {
@@ -96,6 +107,17 @@ const HomePage = () => {
           </HeroActions>
         </HeroContent>
       </Hero>
+          <TagLegend>
+        <LegendTitle>Tag colors</LegendTitle>
+        <LegendItems>
+          {Object.entries(tagAccentColors).map(([tag, color]) => (
+            <LegendItem key={tag}>
+              <LegendSwatch $color={color} />
+              <span>{tag}</span>
+            </LegendItem>
+          ))}
+        </LegendItems>
+      </TagLegend>
 
       <Filters id="recipes">
         <div>
@@ -133,6 +155,8 @@ const HomePage = () => {
           </ChipRow>
         </div>
       </Filters>
+      
+
 
       {error && <Alert>{error}</Alert>}
 
@@ -160,12 +184,8 @@ const HomePage = () => {
 
       {!loading && filteredRecipes.length > 0 && (
         <RecipeGrid>
-          {filteredRecipes.map((recipe, index) => (
-            <RecipeCard
-              key={recipe._id}
-              recipe={recipe}
-              accent={cardAccents[index % cardAccents.length]}
-            />
+          {filteredRecipes.map((recipe) => (
+            <RecipeCard key={recipe._id} recipe={recipe} />
           ))}
         </RecipeGrid>
       )}
@@ -175,16 +195,16 @@ const HomePage = () => {
 
 type CardProps = {
   recipe: Recipe
-  accent: (typeof cardAccents)[number]
 }
 
-const RecipeCard = ({recipe, accent}: CardProps) => {
+const RecipeCard = ({recipe}: CardProps) => {
   const slug = recipe.slug?.current
   const target = slug ? `/recipes/${slug}` : '/'
+  const accentColor = getRecipeAccentColor(recipe)
 
 
   return (
-    <RecipeCardContainer accent={accent} to={target}>
+    <RecipeCardContainer $accentColor={accentColor} to={target}>
       <Eyebrow>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</Eyebrow>
       <h2>{recipe.title}</h2>
       <Muted>{recipe.shortDescription || ''}</Muted>
@@ -251,6 +271,43 @@ const Filters = styled.section`
   @media (max-width: 960px) {
     grid-template-columns: 1fr;
   }
+`
+
+const TagLegend = styled.section`
+  margin: 12px 0 24px;
+  padding: 16px;
+  border-radius: 16px;
+  border: 1px solid #e7d9c5;
+  background: ${({theme}) => theme.colors.surfaceSoft};
+  display: grid;
+  gap: 12px;
+`
+
+const LegendTitle = styled.h3`
+  margin: 0;
+  font-size: 16px;
+`
+
+const LegendItems = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+`
+
+const LegendItem = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 14px;
+`
+
+const LegendSwatch = styled.span<{$color: string}>`
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  background: ${({$color}) => $color};
+  border: 1px solid rgba(0, 0, 0, 0.08);
 `
 
 const SearchRow = styled.div`
@@ -420,7 +477,7 @@ const RecipeGrid = styled.section`
 `
 
 const RecipeCardContainer = styled(Link)<{
-  accent: (typeof cardAccents)[number];
+  $accentColor: string;
   $clickable?: boolean;
 }>`
   background: ${({theme}) => theme.colors.surface};
@@ -441,7 +498,7 @@ const RecipeCardContainer = styled(Link)<{
     position: absolute;
     inset: 0;
     border-radius: ${({theme}) => theme.radii.lg};
-    border-left: 6px solid ${({accent}) => accentColors[accent]};
+    border-left: 6px solid ${({$accentColor}) => $accentColor};
     pointer-events: none;
   }
 

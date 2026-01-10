@@ -85,7 +85,6 @@ const RecipePage = () => {
 
   const heroUrl = urlFor(recipe.heroImage)?.width(1400).height(900).url()
   const difficulty = getDifficultyLabel(recipe.difficulty)
-
   return (
     <Page>
       <TopBar>
