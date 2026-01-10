@@ -84,7 +84,7 @@ const HomePage = () => {
       <Hero>
         <HeroContent>
           <Eyebrow>Drake Family Cookbook</Eyebrow>
-          <h1>Always doy your best and leave the rest up to God!</h1>
+          <h1>Always do your best and leave the rest up to God!</h1>
           <Lede>
             Browse every treasured recipe from the family box. Search, filter, and open the full
             recipe page to see every detail.
