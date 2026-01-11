@@ -104,8 +104,8 @@ const RecipePage = () => {
         </HeroImageContainer>
         <HeroOverlay />
         <HeroContent>
-          <Eyebrow>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</Eyebrow>
           <Title>{recipe.title}</Title>
+          <Eyebrow>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</Eyebrow>
           <HeroLede>{recipe.shortDescription}</HeroLede>
           <MetaRow>
             <MetaItem>
@@ -131,6 +131,12 @@ const RecipePage = () => {
           <ScaleRow>
             <ScaleLabel>Scale recipe</ScaleLabel>
             <ScaleButtons>
+              <ScaleButton type="button" $active={scale === .25} onClick={() => setScale(.25)}>
+                1/4×
+              </ScaleButton>
+              <ScaleButton type="button" $active={scale === .5} onClick={() => setScale(.5)}>
+                1/2×
+              </ScaleButton>
               <ScaleButton type="button" $active={scale === 1} onClick={() => setScale(1)}>
                 1×
               </ScaleButton>
@@ -140,9 +146,7 @@ const RecipePage = () => {
               <ScaleButton type="button" $active={scale === 4} onClick={() => setScale(4)}>
                 4×
               </ScaleButton>
-              <ScaleButton type="button" $active={scale === 8} onClick={() => setScale(8)}>
-                8×
-              </ScaleButton>
+            
             </ScaleButtons>
           </ScaleRow>
 
@@ -249,8 +253,7 @@ const HeroPlaceholder = styled.div`
   height: 100%;
   min-height: 320px;
   display: grid;
-  place-items: center;
-  background: ${({theme}) => theme.colors.surfaceSoft};
+  place-items: center;;
   color: ${({theme}) => theme.colors.muted};
   padding: 16px;
 `
@@ -258,7 +261,8 @@ const HeroPlaceholder = styled.div`
 const HeroOverlay = styled.div`
   position: absolute;
   inset: 0;
-  background: ${({theme}) => theme.colors.sage};
+  background: ${({theme}) => theme.colors.berry};
+  opacity: .8;
 `
 
 const HeroContent = styled.div`
