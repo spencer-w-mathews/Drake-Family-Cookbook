@@ -98,32 +98,33 @@ const RecipePage = () => {
         ) : null}
       </TopBar>
 
-      <Hero>
-        <HeroImageContainer>
-        {heroUrl ? <HeroImage src={heroUrl} alt={recipe.title} /> : <HeroPlaceholder></HeroPlaceholder>}
-        </HeroImageContainer>
-        <HeroOverlay />
-        <HeroContent>
+      <Hero $hasImage={Boolean(heroUrl)}>
+        <HeroInfo>
+          <HeroBadge>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</HeroBadge>
           <Title>{recipe.title}</Title>
-          <Eyebrow>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</Eyebrow>
           <HeroLede>{recipe.shortDescription}</HeroLede>
           <MetaRow>
             <MetaItem>
               <Label>Time</Label>
               <strong>{formatTime(recipe.prepTime, recipe.cookTime)}</strong>
             </MetaItem>
-            {recipe.servings &&
+            {recipe.servings && (
               <MetaItem>
                 <Label>Servings</Label>
                 <strong>{recipe.servings ?? '—'}</strong>
               </MetaItem>
-            }
+            )}
             <MetaItem>
               <Label>Difficulty</Label>
               <strong>{difficulty ?? '—'}</strong>
             </MetaItem>
           </MetaRow>
-        </HeroContent>
+        </HeroInfo>
+        {heroUrl ? (
+          <HeroMedia>
+            <HeroImage src={heroUrl} alt={recipe.title} />
+          </HeroMedia>
+        ) : null}
       </Hero>
 
       <Content>
@@ -227,73 +228,77 @@ const TagRow = styled.div`
   flex-wrap: wrap;
 `
 
-const Hero = styled.section`
-  position: relative;
-  border-radius: 20px;
-  overflow: hidden;
+const Hero = styled.section<{$hasImage: boolean}>`
+  display: grid;
+  grid-template-columns: ${({$hasImage}) =>
+    $hasImage ? 'minmax(0, 1.05fr) minmax(0, 0.95fr)' : 'minmax(0, 1fr)'};
+  gap: 22px;
+  border-radius: 24px;
+  padding: 22px;
   border: 1px solid #e7d9c5;
-  height: 320px;
+  background: linear-gradient(135deg, rgba(246, 194, 166, 0.18), rgba(108, 143, 115, 0.12)),
+    ${({theme}) => theme.colors.surface};
   box-shadow: ${({theme}) => theme.shadows.card};
-  margin-bottom: 20px;
+  margin-bottom: 22px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
 `
-const HeroImageContainer = styled.div`
-height: 320px;
-padding: 10px
+
+const HeroInfo = styled.div`
+  background: ${({theme}) => theme.colors.surface};
+  border-radius: 18px;
+  padding: 20px;
+  border: 1px solid #e7d9c5;
+  display: grid;
+  gap: 12px;
+  box-shadow: ${({theme}) => theme.shadows.card};
+`
+
+const HeroMedia = styled.div`
+  border-radius: 18px;
+  overflow: hidden;
+  min-height: 260px;
+  border: 1px solid #e7d9c5;
+  background: ${({theme}) => theme.colors.surfaceSoft};
+  position: relative;
+
+  @media (max-width: 900px) {
+    min-height: 220px;
+  }
 `
 
 const HeroImage = styled.img`
-  width: auto;
-  height: 300px;
-  margin: auto 0px auto auto;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   display: block;
 `
 
-const HeroPlaceholder = styled.div`
-  width: 100%;
-  height: 100%;
-  min-height: 320px;
-  display: grid;
-  place-items: center;;
-  color: ${({theme}) => theme.colors.muted};
-  padding: 16px;
-`
-
-const HeroOverlay = styled.div`
-  position: absolute;
-  inset: 0;
-  background: ${({theme}) => theme.colors.berry};
-  opacity: .8;
-`
-
-const HeroContent = styled.div`
-  position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 20px;
-  color: #ffffff;
-  display: grid;
-  gap: 8px;
-  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-`
-
-const Eyebrow = styled.p`
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+const HeroBadge = styled.span`
+  width: fit-content;
+  padding: 6px 12px;
+  border-radius: ${({theme}) => theme.radii.pill};
+  background: ${({theme}) => theme.colors.surfaceSoft};
+  border: 1px solid #e7d9c5;
   font-size: 12px;
-  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
   font-weight: 700;
 `
 
 const Title = styled.h1`
   margin: 0;
   font-size: clamp(28px, 4vw, 42px);
-  color: #ffffff;
 `
 
 const HeroLede = styled.p`
   margin: 0;
   font-size: 18px;
-  max-width: 760px;
+  max-width: 680px;
+  color: ${({theme}) => theme.colors.ink};
 `
 
 const MetaRow = styled.div`
@@ -304,10 +309,10 @@ const MetaRow = styled.div`
 `
 
 const MetaItem = styled.div`
-  background: rgba(0, 0, 0, 0.35);
+  background: ${({theme}) => theme.colors.surfaceSoft};
   padding: 10px 12px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid #e7d9c5;
   display: grid;
   gap: 4px;
   min-width: 120px;
@@ -317,7 +322,7 @@ const Label = styled.span`
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 12px;
-  color: #e9e4dc;
+  color: ${({theme}) => theme.colors.muted};
 `
 
 const Content = styled.section`
