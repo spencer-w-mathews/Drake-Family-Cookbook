@@ -30,6 +30,7 @@ const recipeQuery = `*[_type == "recipe"] | order(title asc) {
 const tagAccentColors: Record<string, string> = {
   Appetizer: '#7fb3d5',
   Beverage: '#a3d5c3',
+  Breakfast: '#300c47',
   Soup: '#f3b3b3',
   Salad: '#b7e1a1',
   Vegetable: '#ffd59e',
