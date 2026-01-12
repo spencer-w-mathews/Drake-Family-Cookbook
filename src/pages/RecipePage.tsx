@@ -477,7 +477,7 @@ const formatScaledQuantity = (raw?: string, scale = 1) => {
   const parsed = parseQuantity(raw)
   if (parsed == null) return `${raw} (x${scale})`
   const scaled = parsed * scale
-  return Number.isInteger(scaled) ? String(scaled) : scaled.toFixed(2).replace(/\.?0+$/, '')
+  return formatFraction(scaled)
 }
 
 const parseQuantity = (raw?: string): number | null => {
@@ -507,4 +507,54 @@ const fractionToNumber = (value: string): number | null => {
   }
   const n = Number(value)
   return Number.isFinite(n) ? n : null
+}
+
+const formatFraction = (value: number): string => {
+  if (!Number.isFinite(value)) return String(value)
+  if (Number.isInteger(value)) return String(value)
+
+  const sign = value < 0 ? '-' : ''
+  const absValue = Math.abs(value)
+  const whole = Math.floor(absValue)
+  const remainder = absValue - whole
+
+  const denominators = [2, 3, 4, 6, 8, 12, 16]
+  let bestDen = 1
+  let bestNum = 0
+  let bestError = Number.POSITIVE_INFINITY
+
+  for (const den of denominators) {
+    const num = Math.round(remainder * den)
+    const error = Math.abs(remainder - num / den)
+    if (error < bestError) {
+      bestError = error
+      bestDen = den
+      bestNum = num
+    }
+  }
+
+  if (bestNum === 0) return `${sign}${whole}`
+  if (bestNum === bestDen) return `${sign}${whole + 1}`
+
+  const fraction = simplifyFraction(bestNum, bestDen)
+  const fractionText = `${fraction.num}/${fraction.den}`
+
+  if (whole === 0) return `${sign}${fractionText}`
+  return `${sign}${whole} ${fractionText}`
+}
+
+const simplifyFraction = (num: number, den: number) => {
+  const divisor = gcd(num, den)
+  return {num: num / divisor, den: den / divisor}
+}
+
+const gcd = (a: number, b: number): number => {
+  let x = a
+  let y = b
+  while (y !== 0) {
+    const temp = y
+    y = x % y
+    x = temp
+  }
+  return x || 1
 }
