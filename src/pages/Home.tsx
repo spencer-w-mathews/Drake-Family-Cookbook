@@ -82,7 +82,8 @@ const HomePage = () => {
       const matchesSearch =
         !normalizedSearch ||
         recipe.title.toLowerCase().includes(normalizedSearch) ||
-        recipe.shortDescription?.toLowerCase().includes(normalizedSearch)
+        recipe.shortDescription?.toLowerCase().includes(normalizedSearch) ||
+        recipe.familyMember?.toLowerCase().includes(normalizedSearch)
 
       const matchesTag = tagFilter === 'all' || recipe.tags?.includes(tagFilter)
       return matchesSearch && matchesTag
@@ -107,7 +108,7 @@ const HomePage = () => {
           </HeroActions>
         </HeroContent>
       </Hero>
-          <TagLegend>
+          {/* <TagLegend>
         <LegendTitle>Tag colors</LegendTitle>
         <LegendItems>
           {Object.entries(tagAccentColors).map(([tag, color]) => (
@@ -117,7 +118,7 @@ const HomePage = () => {
             </LegendItem>
           ))}
         </LegendItems>
-      </TagLegend>
+      </TagLegend> */}
 
       <Filters id="recipes">
         <div>
@@ -147,6 +148,7 @@ const HomePage = () => {
                 key={tag}
                 type="button"
                 $active={tagFilter === tag}
+                $accentColor={tagAccentColors[tag]}
                 onClick={() => setTagFilter(tag)}
               >
                 {tag}
@@ -273,42 +275,42 @@ const Filters = styled.section`
   }
 `
 
-const TagLegend = styled.section`
-  margin: 12px 0 24px;
-  padding: 16px;
-  border-radius: 16px;
-  border: 1px solid #e7d9c5;
-  background: ${({theme}) => theme.colors.surfaceSoft};
-  display: grid;
-  gap: 12px;
-`
+// const TagLegend = styled.section`
+//   margin: 12px 0 24px;
+//   padding: 16px;
+//   border-radius: 16px;
+//   border: 1px solid #e7d9c5;
+//   background: ${({theme}) => theme.colors.surfaceSoft};
+//   display: grid;
+//   gap: 12px;
+// `
 
-const LegendTitle = styled.h3`
-  margin: 0;
-  font-size: 16px;
-`
+// const LegendTitle = styled.h3`
+//   margin: 0;
+//   font-size: 16px;
+// `
 
-const LegendItems = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 10px;
-`
+// const LegendItems = styled.div`
+//   display: grid;
+//   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+//   gap: 10px;
+// `
 
-const LegendItem = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-  font-size: 14px;
-`
+// const LegendItem = styled.div`
+//   display: inline-flex;
+//   align-items: center;
+//   gap: 10px;
+//   font-weight: 600;
+//   font-size: 14px;
+// `
 
-const LegendSwatch = styled.span<{$color: string}>`
-  width: 18px;
-  height: 18px;
-  border-radius: 6px;
-  background: ${({$color}) => $color};
-  border: 1px solid rgba(0, 0, 0, 0.08);
-`
+// const LegendSwatch = styled.span<{$color: string}>`
+//   width: 18px;
+//   height: 18px;
+//   border-radius: 6px;
+//   background: ${({$color}) => $color};
+//   border: 1px solid rgba(0, 0, 0, 0.08);
+// `
 
 const SearchRow = styled.div`
   display: flex;
@@ -341,9 +343,10 @@ const ChipRow = styled.div`
   gap: 8px;
 `
 
-const Chip = styled.button<{$active: boolean}>`
+const Chip = styled.button<{$active: boolean; $accentColor?: string}>`
   border: 1px solid #d9c9b5;
-  background: ${({$active, theme}) => ($active ? theme.colors.sage : theme.colors.surfaceSoft)};
+  background: ${({$active, $accentColor, theme}) =>
+    $active ? $accentColor ?? theme.colors.sage : theme.colors.surfaceSoft};
   color: ${({$active}) => ($active ? '#ffffff' : 'inherit')};
   padding: 8px 12px;
   border-radius: ${({theme}) => theme.radii.pill};
