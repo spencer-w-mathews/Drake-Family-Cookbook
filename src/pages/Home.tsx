@@ -1,5 +1,5 @@
 import {useEffect, useMemo, useState} from 'react'
-import {Link} from 'react-router-dom'
+import {Link, useLocation, useSearchParams} from 'react-router-dom'
 import styled from 'styled-components'
 import {client} from '../sanityClient'
 import type {Recipe} from '../types/recipe'
@@ -49,8 +49,7 @@ const getRecipeAccentColor = (recipe: Recipe) => {
 
 const HomePage = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([])
-  const [searchTerm, setSearchTerm] = useState('')
-  const [tagFilter, setTagFilter] = useState('all')
+  const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -71,6 +70,9 @@ const HomePage = () => {
     fetchRecipes()
   }, [])
 
+  const searchTerm = searchParams.get('q') ?? ''
+  const tagFilter = searchParams.get('tag') ?? ''
+
   const availableTags = useMemo(() => {
     const tagSet = new Set<string>()
     recipes.forEach((recipe) => recipe.tags?.forEach((tag) => tagSet.add(tag)))
@@ -86,10 +88,32 @@ const HomePage = () => {
         recipe.shortDescription?.toLowerCase().includes(normalizedSearch) ||
         recipe.familyMember?.toLowerCase().includes(normalizedSearch)
 
-      const matchesTag = tagFilter === 'all' || recipe.tags?.includes(tagFilter)
+      const matchesTag = !tagFilter || recipe.tags?.includes(tagFilter)
       return matchesSearch && matchesTag
     })
   }, [recipes, searchTerm, tagFilter])
+
+  const toggleTag = (tag: string) => {
+    const next = new URLSearchParams(searchParams)
+    if (tagFilter === tag) {
+      next.delete('tag')
+    } else {
+      next.set('tag', tag)
+    }
+    setSearchParams(next, {replace: true})
+  }
+
+
+  const updateSearchTerm = (value: string) => {
+    const next = new URLSearchParams(searchParams)
+    if (value.trim()) {
+      next.set('q', value)
+    } else {
+      next.delete('q')
+    }
+    setSearchParams(next, {replace: true})
+  }
+
 
 
   return (
@@ -109,20 +133,27 @@ const HomePage = () => {
           </HeroActions>
         </HeroContent>
       </Hero>
-          {/* <TagLegend>
-        <LegendTitle>Tag colors</LegendTitle>
-        <LegendItems>
-          {Object.entries(tagAccentColors).map(([tag, color]) => (
-            <LegendItem key={tag}>
-              <LegendSwatch $color={color} />
-              <span>{tag}</span>
-            </LegendItem>
-          ))}
-        </LegendItems>
-      </TagLegend> */}
 
-      <Filters id="recipes">
+
+      <Filters >
         <div>
+          <Eyebrow>Filter by tag</Eyebrow>
+          <FilterHint>Select a tag to filter. Tap again to remove.</FilterHint>
+          <ChipRow>
+            {availableTags.map((tag) => (
+              <Chip
+                key={tag}
+                type="button"
+                $active={tagFilter === tag}
+                $accentColor={tagAccentColors[tag]}
+                onClick={() => toggleTag(tag)}
+              >
+                {tag}
+              </Chip>
+            ))}
+          </ChipRow>
+        </div>
+        <div id="recipes">
           <Eyebrow>Find a recipe</Eyebrow>
           <SearchRow>
             <SearchInput
@@ -130,33 +161,15 @@ const HomePage = () => {
               type="search"
               placeholder="Search by name or description"
               value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-            <Count>
-              {loading ? 'Loading…' : ``}
-            </Count>
+              onChange={(event) => updateSearchTerm(event.target.value)}
+              />
           </SearchRow>
+          <Count>
+              {loading ? 'Loading…' : `Showing ${filteredRecipes.length} of ${recipes.length}`}
+          </Count>
+            
         </div>
 
-        <div>
-          <Eyebrow>Filter by tag</Eyebrow>
-          <ChipRow>
-            <Chip type="button" $active={tagFilter === 'all'} onClick={() => setTagFilter('all')}>
-              All
-            </Chip>
-            {availableTags.map((tag) => (
-              <Chip
-                key={tag}
-                type="button"
-                $active={tagFilter === tag}
-                $accentColor={tagAccentColors[tag]}
-                onClick={() => setTagFilter(tag)}
-              >
-                {tag}
-              </Chip>
-            ))}
-          </ChipRow>
-        </div>
       </Filters>
       
 
@@ -204,10 +217,11 @@ const RecipeCard = ({recipe}: CardProps) => {
   const slug = recipe.slug?.current
   const target = slug ? `/recipes/${slug}` : '/'
   const accentColor = getRecipeAccentColor(recipe)
+  const location = useLocation()
 
 
   return (
-    <RecipeCardContainer $accentColor={accentColor} to={target}>
+    <RecipeCardContainer $accentColor={accentColor} to={{pathname: target, search: location.search}}>
       <Eyebrow>{recipe.familyMember ? `Shared by ${recipe.familyMember}` : 'Family recipe'}</Eyebrow>
       <h2>{recipe.title}</h2>
       <Muted>{recipe.shortDescription || ''}</Muted>
@@ -267,7 +281,7 @@ const HeroActions = styled.div`
 const Filters = styled.section`
   margin: 32px 0 12px;
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: end;
 
@@ -336,6 +350,13 @@ const SearchInput = styled.input`
 const Count = styled.div`
   font-weight: 600;
   color: ${({theme}) => theme.colors.sageStrong};
+  margin-top: 20px;
+`
+
+const FilterHint = styled.p`
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #5a665d;
 `
 
 const ChipRow = styled.div`

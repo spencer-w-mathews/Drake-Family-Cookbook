@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react'
-import {Link, useParams} from 'react-router-dom'
+import {Link, useLocation, useParams} from 'react-router-dom'
 import styled from 'styled-components'
 import {client, urlFor} from '../sanityClient'
 import type {Recipe} from '../types/recipe'
@@ -34,6 +34,8 @@ const RecipePage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [scale, setScale] = useState(1)
+  const location = useLocation()
+  const backLink = {pathname: '/', search: location.search}
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -65,7 +67,7 @@ const RecipePage = () => {
     return (
       <Page>
         <TopBar>
-          <BackLink to="/">← Back to recipes</BackLink>
+          <BackLink to={backLink}>← Back to recipes</BackLink>
         </TopBar>
         <Muted>Loading recipe…</Muted>
       </Page>
@@ -76,7 +78,7 @@ const RecipePage = () => {
     return (
       <Page>
         <TopBar>
-          <BackLink to="/">← Back to recipes</BackLink>
+          <BackLink to={backLink}>← Back to recipes</BackLink>
         </TopBar>
         <Alert>{error ?? 'Recipe not found'}</Alert>
       </Page>
@@ -88,7 +90,7 @@ const RecipePage = () => {
   return (
     <Page>
       <TopBar>
-        <BackLink to="/">← Back to recipes</BackLink>
+        <BackLink to={backLink}>← Back to recipes</BackLink>
         {recipe.tags && recipe.tags.length > 0 ? (
           <TagRow>
             {recipe.tags.map((tag) => (
