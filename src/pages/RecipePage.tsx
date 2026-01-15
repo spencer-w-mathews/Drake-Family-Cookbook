@@ -244,6 +244,8 @@ const Hero = styled.section<{$hasImage: boolean}>`
   margin-bottom: 22px;
 
   @media (max-width: 900px) {
+    display: flex;
+    flex-direction: column-reverse;
     grid-template-columns: 1fr;
     padding: 18px;
   }
@@ -268,7 +270,7 @@ const HeroMedia = styled.div`
   position: relative;
 
   @media (max-width: 900px) {
-    min-height: 220px;
+    min-height: unset;
   }
 `
 
@@ -281,6 +283,8 @@ const HeroImage = styled.img`
 
 const HeroBadge = styled.span`
   width: fit-content;
+  justify-self: start;
+  align-self: start;
   padding: 6px 12px;
   border-radius: ${({theme}) => theme.radii.pill};
   background: ${({theme}) => theme.colors.surfaceSoft};
@@ -289,6 +293,7 @@ const HeroBadge = styled.span`
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 700;
+  white-space: nowrap;
 `
 
 const Title = styled.h1`
