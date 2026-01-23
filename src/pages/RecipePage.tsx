@@ -259,6 +259,7 @@ const HeroInfo = styled.div`
   display: grid;
   gap: 12px;
   box-shadow: ${({theme}) => theme.shadows.card};
+  min-width: 0;
 `
 
 const HeroMedia = styled.div`
@@ -293,12 +294,16 @@ const HeroBadge = styled.span`
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-weight: 700;
-  white-space: nowrap;
+  white-space: normal;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 `
 
 const Title = styled.h1`
   margin: 0;
   font-size: clamp(28px, 4vw, 42px);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 `
 
 const HeroLede = styled.p`
@@ -306,6 +311,8 @@ const HeroLede = styled.p`
   font-size: 18px;
   max-width: 680px;
   color: ${({theme}) => theme.colors.ink};
+  overflow-wrap: anywhere;
+  word-break: break-word;
 `
 
 const MetaRow = styled.div`
